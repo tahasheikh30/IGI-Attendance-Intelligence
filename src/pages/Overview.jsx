@@ -5,6 +5,7 @@ import DeptBarChart from "../components/DeptBarChart";
 import EmployeeDrawer from "../components/EmployeeDrawer";
 import { useRange } from "../context/RangeContext";
 import { useAuth } from "../context/AuthContext";
+import LoadingDots from "../components/LoadingDots";
 
 export default function Overview() {
   const [data, setData] = useState(null);
@@ -44,7 +45,7 @@ export default function Overview() {
   }, [data, search]);
 
   if (loading) {
-    return <div className="empty-state">Loading…</div>;
+    return <div className="empty-state"><LoadingDots /></div>;
   }
 
   if (failed && !data) {

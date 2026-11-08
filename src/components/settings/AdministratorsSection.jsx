@@ -3,6 +3,7 @@ import { getUsers, updateUser } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../Toaster";
 import { SettingGroup } from "./controls";
+import LoadingDots from "../LoadingDots";
 
 const ROLE_LABEL = { admin: "HR admin", hod: "HOD", manager: "Manager" };
 
@@ -90,7 +91,7 @@ export default function AdministratorsSection() {
   if (error) {
     return <p className="notice notice-warn" role="alert">{error} <button type="button" className="link-btn" onClick={load}>Try again</button></p>;
   }
-  if (!users) return <p className="setting-hint">Loading accounts…</p>;
+  if (!users) return <LoadingDots inline label="Loading accounts…" />;
 
   return (
     <>

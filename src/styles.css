@@ -1290,3 +1290,61 @@ h1 {
 .password-form { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; font-size: 12.5px; color: var(--text-secondary); }
 .password-form label { display: flex; flex-direction: column; gap: 4px; }
 .settings-body input[type="search"].login-input { width: 100%; box-sizing: border-box; }
+
+/* ---- loading dots: three dots hop over each other and swap places ---- */
+.loading-dots {
+  --dot: 9px; --gap: 18px; --hop: 13px;
+  display: inline-flex; flex-direction: column; align-items: center; gap: 14px;
+  color: var(--text-secondary);
+}
+.loading-dots-inline { --dot: 6px; --gap: 12px; --hop: 9px; flex-direction: row; gap: 10px; }
+.loading-dots-track {
+  position: relative; display: block;
+  width: calc(var(--gap) * 2 + var(--dot)); height: calc(var(--hop) + var(--dot) + 2px);
+}
+.loading-dots-track i {
+  position: absolute; left: 0; bottom: 0;
+  width: var(--dot); height: var(--dot); border-radius: 50%;
+  background: var(--accent);
+}
+.loading-dots-track .dot-a { animation: dots-a 2.4s ease-in-out infinite; }
+.loading-dots-track .dot-b { animation: dots-b 2.4s ease-in-out infinite; opacity: 0.8; }
+.loading-dots-track .dot-c { animation: dots-c 2.4s ease-in-out infinite; opacity: 0.6; }
+.loading-dots-label { font-size: 13.5px; }
+/* Each swap is two neighbours trading places: the one moving right hops over, the one moving left slips under. */
+@keyframes dots-a {
+  0%, 100% { transform: translate(0, 0); }
+  8.333% { transform: translate(calc(var(--gap) * .5), calc(var(--hop) * -1)); }
+  16.667% { transform: translate(var(--gap), 0); }
+  25% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -1)); }
+  33.333%, 50% { transform: translate(calc(var(--gap) * 2), 0); }
+  58.333% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -.25)); }
+  66.667% { transform: translate(var(--gap), 0); }
+  75% { transform: translate(calc(var(--gap) * .5), calc(var(--hop) * -.25)); }
+  83.333% { transform: translate(0, 0); }
+}
+@keyframes dots-b {
+  0%, 100% { transform: translate(var(--gap), 0); }
+  8.333% { transform: translate(calc(var(--gap) * .5), calc(var(--hop) * -.25)); }
+  16.667%, 33.333% { transform: translate(0, 0); }
+  41.667% { transform: translate(calc(var(--gap) * .5), calc(var(--hop) * -1)); }
+  50% { transform: translate(var(--gap), 0); }
+  58.333% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -1)); }
+  66.667%, 83.333% { transform: translate(calc(var(--gap) * 2), 0); }
+  91.667% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -.25)); }
+}
+@keyframes dots-c {
+  0%, 16.667%, 100% { transform: translate(calc(var(--gap) * 2), 0); }
+  25% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -.25)); }
+  33.333% { transform: translate(var(--gap), 0); }
+  41.667% { transform: translate(calc(var(--gap) * .5), calc(var(--hop) * -.25)); }
+  50%, 66.667% { transform: translate(0, 0); }
+  75% { transform: translate(calc(var(--gap) * .5), calc(var(--hop) * -1)); }
+  83.333% { transform: translate(var(--gap), 0); }
+  91.667% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -1)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-dots-track .dot-a, .loading-dots-track .dot-b, .loading-dots-track .dot-c { animation: none; }
+  .loading-dots-track .dot-b { transform: translateX(var(--gap)); }
+  .loading-dots-track .dot-c { transform: translateX(calc(var(--gap) * 2)); }
+}
