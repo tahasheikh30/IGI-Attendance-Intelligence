@@ -47,6 +47,9 @@ export const getMe = () => api.get("/me").then(r => r.data);
 // Per-user settings (notifications and display) and the cheap poll the app uses to notice new data.
 export const getPreferences = () => api.get("/me/preferences").then(r => r.data.preferences);
 export const savePreferences = (prefs) => api.put("/me/preferences", prefs).then(r => r.data.preferences);
+// Changes the signed in person's own password. The answer carries a fresh token, because the old one stops working.
+export const changePassword = (current_password, new_password) =>
+  api.post("/me/password", { current_password, new_password }).then(r => r.data);
 export const getDataStatus = () => api.get("/data-status").then(r => r.data);
 
 // Every window-scoped endpoint below takes EITHER `days` (a rolling

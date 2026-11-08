@@ -16,7 +16,7 @@ import { ToastProvider, useToast, useNotifications, deliveryFor } from "../compo
 import { PreferencesProvider, usePreferences } from "../context/PreferencesContext";
 import { resetApiMock } from "../test/apiMock";
 
-beforeEach(() => { resetApiMock(api.current); auth.value = authValue(users.admin, { refreshMe: vi.fn() }); });
+beforeEach(() => { localStorage.clear(); delete document.documentElement.dataset.theme; resetApiMock(api.current); auth.value = authValue(users.admin, { refreshMe: vi.fn() }); });
 afterEach(() => vi.useRealTimers());
 
 function Harness({ children }) {
@@ -130,12 +130,79 @@ describe("SettingsModal", () => {
     fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "light" } });
     expect(document.documentElement.dataset.theme).toBe("light");
   });
-  it("leaving (signing out) removes the theme from the page", async () => {
+  it("the theme stays on the page after signing out, and is remembered for the next visit", async () => {
     api.current.getPreferences.mockResolvedValue(preferences({ display: { default_view: "overview", default_days: 30, theme: "dark" } }));
     const { unmount } = render(<Harness><span /></Harness>);
     await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
     unmount();
-    expect(document.documentElement.dataset.theme).toBeUndefined();
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(localStorage.getItem("attendance_theme")).toBe("dark");
+  });
+  it("the default (light) does not undo the remembered theme while settings are still loading", async () => {
+    let release;
+    api.current.getPreferences.mockReturnValue(new Promise((r) => { release = r; }));
+    document.documentElement.dataset.theme = "dark";
+    render(<Harness><span /></Harness>);
+    await new Promise((r) => setTimeout(r, 30));
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    release(preferences({ display: { default_view: "overview", default_days: 30, theme: "light" } }));
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
+  });
+  it("a failed load keeps the remembered theme", async () => {
+    api.current.getPreferences.mockRejectedValue(axiosError(500));
+    document.documentElement.dataset.theme = "dark";
+    render(<Harness><span /></Harness>);
+    await waitFor(() => expect(api.current.getPreferences).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 30));
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+});
+
+describe("Change password", () => {
+  const form = async (props = {}) => {
+    auth.value = authValue(users.manager, { changePassword: vi.fn().mockResolvedValue(undefined) });
+    await openModal(props);
+    fireEvent.click(screen.getByRole("button", { name: "Change password" }));
+  };
+  const fill = (cur, nw, again) => {
+    fireEvent.change(screen.getByLabelText("Current password"), { target: { value: cur } });
+    fireEvent.change(screen.getByLabelText("New password"), { target: { value: nw } });
+    fireEvent.change(screen.getByLabelText("Repeat new password"), { target: { value: again } });
+  };
+  it("is offered to every role, not only administrators", async () => {
+    await form();
+    expect(screen.getByRole("form", { name: "Change password" })).toBeInTheDocument();
+  });
+  it("sends the current and new password, then closes", async () => {
+    await form();
+    fill("old-password", "new-password-1", "new-password-1");
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    await waitFor(() => expect(auth.value.changePassword).toHaveBeenCalledWith("old-password", "new-password-1"));
+    await waitFor(() => expect(screen.queryByRole("form", { name: "Change password" })).toBeNull());
+  });
+  it.each([
+    ["short", "short", /at least 8/],
+    ["longenough1", "different-1", /do not match/],
+  ])("checks the new password before sending (%s)", async (nw, again, message) => {
+    await form();
+    fill("old-password", nw, again);
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(auth.value.changePassword).not.toHaveBeenCalled();
+  });
+  it("refuses a new password equal to the current one", async () => {
+    await form();
+    fill("same-password-1", "same-password-1", "same-password-1");
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    expect(await screen.findByText(/different from your current/)).toBeInTheDocument();
+  });
+  it("shows the server's reason, such as a wrong current password, and stays open", async () => {
+    await form();
+    auth.value.changePassword.mockRejectedValue(axiosError(400, "Your current password is not correct."));
+    fill("wrong-password", "new-password-1", "new-password-1");
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    expect(await screen.findByText("Your current password is not correct.")).toBeInTheDocument();
+    expect(screen.getByRole("form", { name: "Change password" })).toBeInTheDocument();
   });
 });
 

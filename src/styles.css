@@ -1286,3 +1286,7 @@ h1 {
 :root[data-theme="dark"] .recharts-default-tooltip { background: var(--surface) !important; border-color: var(--border) !important; }
 :root[data-theme="dark"] .recharts-tooltip-label,
 :root[data-theme="dark"] .recharts-tooltip-item { color: var(--text) !important; }
+
+.password-form { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; font-size: 12.5px; color: var(--text-secondary); }
+.password-form label { display: flex; flex-direction: column; gap: 4px; }
+.settings-body input[type="search"].login-input { width: 100%; box-sizing: border-box; }

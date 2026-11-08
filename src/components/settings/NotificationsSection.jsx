@@ -14,7 +14,7 @@ export default function NotificationsSection({ isAdmin }) {
   const visible = CATEGORIES.filter((c) => isAdmin || !c.adminOnly);
   return (
     <>
-      <SettingGroup title="Notifications" hint="Errors are always shown, whatever is switched off here.">
+      <SettingGroup title="Delivery" hint="Errors are always shown, whatever is switched off here.">
         <SettingRow title="Notifications" description="The master switch. Off hides everything below except errors.">
           <Switch label="Notifications" checked={n.enabled} onChange={(v) => update({ notifications: { enabled: v } })} />
         </SettingRow>
