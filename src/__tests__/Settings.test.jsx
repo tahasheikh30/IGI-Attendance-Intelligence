@@ -16,7 +16,7 @@ import { ToastProvider, useToast, useNotifications, deliveryFor } from "../compo
 import { PreferencesProvider, usePreferences } from "../context/PreferencesContext";
 import { resetApiMock } from "../test/apiMock";
 
-beforeEach(() => { resetApiMock(api.current); auth.value = authValue(users.admin, { refreshMe: vi.fn() }); });
+beforeEach(() => { localStorage.clear(); delete document.documentElement.dataset.theme; resetApiMock(api.current); auth.value = authValue(users.admin, { refreshMe: vi.fn() }); });
 afterEach(() => vi.useRealTimers());
 
 function Harness({ children }) {
@@ -130,12 +130,31 @@ describe("SettingsModal", () => {
     fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "light" } });
     expect(document.documentElement.dataset.theme).toBe("light");
   });
-  it("leaving (signing out) removes the theme from the page", async () => {
+  it("the theme stays on the page after signing out, and is remembered for the next visit", async () => {
     api.current.getPreferences.mockResolvedValue(preferences({ display: { default_view: "overview", default_days: 30, theme: "dark" } }));
     const { unmount } = render(<Harness><span /></Harness>);
     await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
     unmount();
-    expect(document.documentElement.dataset.theme).toBeUndefined();
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(localStorage.getItem("attendance_theme")).toBe("dark");
+  });
+  it("the default (light) does not undo the remembered theme while settings are still loading", async () => {
+    let release;
+    api.current.getPreferences.mockReturnValue(new Promise((r) => { release = r; }));
+    document.documentElement.dataset.theme = "dark";
+    render(<Harness><span /></Harness>);
+    await new Promise((r) => setTimeout(r, 30));
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    release(preferences({ display: { default_view: "overview", default_days: 30, theme: "light" } }));
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
+  });
+  it("a failed load keeps the remembered theme", async () => {
+    api.current.getPreferences.mockRejectedValue(axiosError(500));
+    document.documentElement.dataset.theme = "dark";
+    render(<Harness><span /></Harness>);
+    await waitFor(() => expect(api.current.getPreferences).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 30));
+    expect(document.documentElement.dataset.theme).toBe("dark");
   });
 });
 

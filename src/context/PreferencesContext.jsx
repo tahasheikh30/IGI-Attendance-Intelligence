@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getPreferences, savePreferences } from "../api";
 import { useNotifications, useToast } from "../components/Toaster";
+import { applyTheme } from "../lib/theme";
 
 export const DEFAULT_PREFERENCES = {
   notifications: {
@@ -58,11 +59,12 @@ export function PreferencesProvider({ children }) {
   useEffect(() => { load(); }, [load]);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  // the theme is a CSS switch on the page root; signing out (this provider going away) puts the light theme back
+  // The theme is a CSS switch on the page root. It waits for the saved settings (the defaults say "light" and must
+  // not undo the theme remembered from the last visit), and it stays after signing out so the sign in page
+  // keeps the same colours.
   useEffect(() => {
-    document.documentElement.dataset.theme = prefs.display.theme;
-    return () => { delete document.documentElement.dataset.theme; };
-  }, [prefs.display.theme]);
+    if (loaded && !loadFailed) applyTheme(prefs.display.theme);
+  }, [loaded, loadFailed, prefs.display.theme]);
 
   // the toaster follows these switches
   useEffect(() => { configure(prefs.notifications); }, [prefs.notifications, configure]);
