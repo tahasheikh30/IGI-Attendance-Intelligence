@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { uploadFile, getUploads, deleteUpload } from "../api";
+import { useToast } from "../components/Toaster";
 
 export default function UploadPage() {
+  const toast = useToast();
   const [dragging, setDragging] = useState(false);
   const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
@@ -19,9 +21,13 @@ export default function UploadPage() {
     try {
       const summary = await uploadFile(file);
       setStatus(summary);
+      window.dispatchEvent(new Event("data:local-change"));
+      toast.success("Upload complete", { message: `${file?.name}: ${summary.rows_ingested} rows`, category: "uploads" });
       refreshHistory();
     } catch (e) {
-      setError(e?.response?.data?.detail || "Upload failed - check the file format");
+      const detail = e?.response?.data?.detail || "Upload failed - check the file format";
+      setError(detail);
+      toast.error("Upload failed", { message: typeof detail === "string" ? detail : "", category: "uploads" });
       setStatus(null);
     }
   };
@@ -36,6 +42,8 @@ export default function UploadPage() {
     try {
       const result = await deleteUpload(id);
       refreshHistory();
+      window.dispatchEvent(new Event("data:local-change"));
+      toast.success("Upload removed", { message: filename, category: "uploads" });
       if (result.attendance_rows_deleted > 0) {
         window.alert(`Removed the log entry and ${result.attendance_rows_deleted} attendance rows that were still attributed to it.`);
       }

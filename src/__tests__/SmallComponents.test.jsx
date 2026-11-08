@@ -97,7 +97,7 @@ describe("DailyHeatmap", () => {
   it("a day with nobody scheduled is grey and says so", () => {
     const { container } = render(<DailyHeatmap days={[{ date: "2026-10-22", latePct: 0, scheduled: 0 }]} />);
     expect(cells(container)[0].title).toBe("2026-10-22 · no scheduled staff");
-    expect(cells(container)[0].style.background).toBe("rgb(238, 241, 245)");
+    expect(cells(container)[0].style.background).toBe("var(--surface-muted)"); // follows the light or dark theme
   });
   it("0% late is the light blue end of the scale and 100% is the red end", () => {
     const { container } = render(<DailyHeatmap days={[{ date: "a", latePct: 0, scheduled: 5 }, { date: "b", latePct: 100, scheduled: 5 }]} />);

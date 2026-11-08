@@ -28,7 +28,8 @@ export default function AnalyticsPage() {
       // same layout -- rather than regenerating them server-side, so what
       // you download always matches what's on screen.
       const dataUrl = await toPng(chartsRef.current, {
-        backgroundColor: "#F5F7FA",
+        // the exported picture takes the page background of the theme in use
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#F5F7FA",
         pixelRatio: 2,
         cacheBust: true,
       });
@@ -162,7 +163,7 @@ export default function AnalyticsPage() {
           <div className="legend">
             <span className="legend-item"><span className="legend-swatch" style={{ background: "#C4E0F5" }} />Low late rate</span>
             <span className="legend-item"><span className="legend-swatch" style={{ background: "#C0432A" }} />High late rate</span>
-            <span className="legend-item"><span className="legend-swatch" style={{ background: "#EEF1F5" }} />No one scheduled</span>
+            <span className="legend-item"><span className="legend-swatch" style={{ background: "var(--surface-muted)" }} />No one scheduled</span>
           </div>
         </div>
       </div>

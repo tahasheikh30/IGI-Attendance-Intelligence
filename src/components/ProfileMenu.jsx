@@ -1,0 +1,105 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const CLOSE_DELAY_MS = 180;
+
+function Icon({ children }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+  );
+}
+
+function initialsFor(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] || "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+/**
+ * The round profile button at the right of the top bar. The menu opens on hover, and also on click or tap and from
+ * the keyboard (Enter or Space on the button, Escape to close), so it does not depend on a mouse. A dot sits on
+ * the button while there are unread notifications.
+ *
+ * The items are always in the page and only hidden with CSS while closed, so they are never reachable by Tab or
+ * a screen reader until the menu is open.
+ */
+export default function ProfileMenu({ name, username, unread = 0, onSettings, onNotifications, onSignOut }) {
+  const [open, setOpen] = useState(false);
+  const root = useRef(null);
+  const button = useRef(null);
+  const closeTimer = useRef(null);
+
+  const show = useCallback(() => { clearTimeout(closeTimer.current); setOpen(true); }, []);
+  const hideSoon = useCallback(() => {
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), CLOSE_DELAY_MS);
+  }, []);
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => { if (!root.current?.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [open]);
+
+  function onKeyDown(e) {
+    if (e.key === "Escape" && open) { setOpen(false); button.current?.focus(); }
+  }
+  function onBlur(e) {
+    if (!root.current?.contains(e.relatedTarget)) hideSoon(); // keyboard focus left the whole menu
+  }
+  function choose(action) { setOpen(false); action(); }
+
+  const label = unread > 0
+    ? `Account menu, ${unread} unread ${unread === 1 ? "notification" : "notifications"}`
+    : "Account menu";
+
+  return (
+    <div ref={root} className={`profile${open ? " profile-open" : ""}`}
+      onMouseEnter={show} onMouseLeave={hideSoon} onKeyDown={onKeyDown} onBlur={onBlur}>
+      <button ref={button} type="button" className="profile-btn" aria-label={label} aria-haspopup="true"
+        aria-expanded={open} aria-controls="profile-panel" onClick={() => setOpen((v) => !v)}>
+        <span aria-hidden="true">{initialsFor(name)}</span>
+        {unread > 0 && <span className="profile-dot" aria-hidden="true" />}
+      </button>
+
+      <div id="profile-panel" className="profile-panel">
+        <div className="profile-card">
+          <div className="profile-head">
+            <span className="profile-head-role">Signed in as</span>
+            <span className="profile-head-name" title={username}>{username}</span>
+          </div>
+          <div className="profile-items">
+            <button type="button" className="profile-item" onClick={() => choose(onSettings)}>
+              <Icon>
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+              </Icon>
+              <span>Settings</span>
+            </button>
+            <button type="button" className="profile-item" onClick={() => choose(onNotifications)}>
+              <Icon><path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2h-15z" /><path d="M10 21a2 2 0 0 0 4 0" /></Icon>
+              <span>Notifications</span>
+              {unread > 0 && (
+                <span className="profile-count" aria-label={`${unread} unread`}>{unread > 9 ? "9+" : unread}</span>
+              )}
+            </button>
+            <div className="profile-sep" role="separator" />
+            <button type="button" className="profile-item profile-item-danger navbar-signout"
+              onClick={() => choose(onSignOut)}>
+              <Icon><path d="M9 4H5v16h4" /><path d="M16 8l4 4-4 4" /><path d="M20 12H9" /></Icon>
+              <span className="signout-label">Sign out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -3,6 +3,7 @@ import {
   getUsers, createUser, updateUser, resetUserPassword, deleteUser, getAllDepartments, getCompanies,
 } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../components/Toaster";
 
 const emptyForm = { username: "", name: "", password: "", role: "manager", departments: [], companies: [] };
 const ROLE_LABEL = { admin: "HR admin", hod: "HOD", manager: "Manager" };
@@ -187,6 +188,7 @@ function UserForm({ initial, allDepts, allCompanies, onCancel, onSubmit, submitL
 
 export default function UsersPage() {
   const { me } = useAuth();
+  const toast = useToast();
   const [users, setUsers] = useState(null);
   const [allDepts, setAllDepts] = useState([]);
   const [allCompanies, setAllCompanies] = useState([]);
@@ -209,6 +211,7 @@ export default function UsersPage() {
       companies: form.role === "hod" ? form.companies : [],
     });
     setCreating(false);
+    toast.success(`Account created for ${form.name}`, { category: "users" });
     refresh();
   };
 
@@ -221,6 +224,7 @@ export default function UsersPage() {
     await updateUser(id, patch);
     if (form.password) await resetUserPassword(id, form.password);
     setEditingId(null);
+    toast.success(form.role === "admin" ? `${form.name} saved (administrator)` : `${form.name} saved`, { category: "users" });
     refresh();
   };
 
@@ -228,6 +232,7 @@ export default function UsersPage() {
     setBusyId(u.id);
     try {
       await updateUser(u.id, { active: !u.active });
+      toast.success(u.active ? `${u.name} deactivated` : `${u.name} reactivated`, { category: "users" });
       refresh();
     } catch (err) {
       window.alert(err?.response?.data?.detail || "Couldn't update that user.");
@@ -241,6 +246,7 @@ export default function UsersPage() {
     setBusyId(u.id);
     try {
       await deleteUser(u.id);
+      toast.success(`${u.username} deleted`, { category: "users" });
       refresh();
     } catch (err) {
       window.alert(err?.response?.data?.detail || "Couldn't delete that user.");

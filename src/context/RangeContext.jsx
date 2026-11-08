@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { usePreferences } from "./PreferencesContext";
 
 const RangeContext = createContext(null);
 
@@ -17,8 +18,19 @@ export function RangeProvider({ children }) {
   // clears the other's "active" state.
   const [period, setPeriodState] = useState(null);
 
-  const setDays = (d) => { setDaysState(d); setPeriodState(null); };
-  const setPeriod = (key) => setPeriodState(key);
+  // The person's saved default window applies once, when their settings arrive, unless they already picked a
+  // window themselves in the meantime.
+  const { prefs, loaded, loadFailed } = usePreferences();
+  const touched = useRef(false);
+  const appliedDefault = useRef(false);
+  useEffect(() => {
+    if (!loaded || loadFailed || touched.current || appliedDefault.current) return;
+    appliedDefault.current = true;
+    setDaysState(prefs.display.default_days);
+  }, [loaded, loadFailed, prefs.display.default_days]);
+
+  const setDays = (d) => { touched.current = true; setDaysState(d); setPeriodState(null); };
+  const setPeriod = (key) => { touched.current = true; setPeriodState(key); };
   const clearPeriod = () => setPeriodState(null);
 
   return (
