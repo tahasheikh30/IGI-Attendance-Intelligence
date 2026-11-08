@@ -110,23 +110,32 @@ describe("SettingsModal", () => {
     function Probe() { const { unread } = useNotifications(); return <span data-testid="unread">{unread}</span>; }
     render(<Harness><SettingsModal initial="display" onClose={() => {}} onSignOut={() => {}} /><Probe /></Harness>);
     await waitFor(() => expect(api.current.getPreferences).toHaveBeenCalled());
-    fireEvent.change(screen.getByLabelText("Density"), { target: { value: "compact" } });
+    fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "dark" } });
     await act(async () => { vi.advanceTimersByTime(700); });
-    await waitFor(() => expect(screen.getByLabelText("Density")).toHaveValue("comfortable"));
+    await waitFor(() => expect(screen.getByLabelText("Theme")).toHaveValue("light"));
     expect(screen.getByTestId("unread")).toHaveTextContent("1");
   });
   it("when settings cannot be loaded it says so and does not try to save", async () => {
     api.current.getPreferences.mockRejectedValue(axiosError(500));
     await openModal({ initial: "display" });
     expect(await screen.findByText(/could not be loaded/i)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Density"), { target: { value: "compact" } });
+    fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "dark" } });
     await new Promise((r) => setTimeout(r, 700));
     expect(api.current.savePreferences).not.toHaveBeenCalled();
   });
-  it("compact density sets the page attribute", async () => {
-    api.current.getPreferences.mockResolvedValue(preferences({ display: { default_view: "overview", default_days: 30, density: "compact" } }));
-    await openModal();
-    await waitFor(() => expect(document.documentElement.dataset.density).toBe("compact"));
+  it("the saved theme is set on the page, and choosing another changes it at once", async () => {
+    api.current.getPreferences.mockResolvedValue(preferences({ display: { default_view: "overview", default_days: 30, theme: "dark" } }));
+    await openModal({ initial: "display" });
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+    fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "light" } });
+    expect(document.documentElement.dataset.theme).toBe("light");
+  });
+  it("leaving (signing out) removes the theme from the page", async () => {
+    api.current.getPreferences.mockResolvedValue(preferences({ display: { default_view: "overview", default_days: 30, theme: "dark" } }));
+    const { unmount } = render(<Harness><span /></Harness>);
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+    unmount();
+    expect(document.documentElement.dataset.theme).toBeUndefined();
   });
 });
 
@@ -232,8 +241,8 @@ describe("Toaster and the notifications page", () => {
 
 describe("usePreferences outside a provider", () => {
   it("gives the defaults and ignores changes", () => {
-    function P() { const { prefs, update } = usePreferences(); update({ display: { density: "compact" } }); return <span>{prefs.display.density}</span>; }
+    function P() { const { prefs, update } = usePreferences(); update({ display: { theme: "dark" } }); return <span>{prefs.display.theme}</span>; }
     render(<P />);
-    expect(screen.getByText("comfortable")).toBeInTheDocument();
+    expect(screen.getByText("light")).toBeInTheDocument();
   });
 });

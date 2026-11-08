@@ -8,7 +8,7 @@ export const DEFAULT_PREFERENCES = {
     popups: true,
     categories: { data: true, access: true, uploads: true, users: true },
   },
-  display: { default_view: "overview", default_days: 30, density: "comfortable" },
+  display: { default_view: "overview", default_days: 30, theme: "light" },
 };
 
 const SAVE_DELAY_MS = 600;
@@ -58,11 +58,11 @@ export function PreferencesProvider({ children }) {
   useEffect(() => { load(); }, [load]);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  // compact density is a CSS switch on the page root
+  // the theme is a CSS switch on the page root; signing out (this provider going away) puts the light theme back
   useEffect(() => {
-    document.documentElement.dataset.density = prefs.display.density;
-    return () => { delete document.documentElement.dataset.density; };
-  }, [prefs.display.density]);
+    document.documentElement.dataset.theme = prefs.display.theme;
+    return () => { delete document.documentElement.dataset.theme; };
+  }, [prefs.display.theme]);
 
   // the toaster follows these switches
   useEffect(() => { configure(prefs.notifications); }, [prefs.notifications, configure]);

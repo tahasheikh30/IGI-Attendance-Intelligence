@@ -7,7 +7,7 @@ export default function DisplaySection() {
   const { prefs, update } = usePreferences();
   const d = prefs.display;
   return (
-    <SettingGroup title="Display" hint="Applied each time you sign in. Changing the window in the top bar still works for the session.">
+    <SettingGroup title="Display" hint="The opening page and window apply each time you sign in. Changing the window in the top bar still works for the session.">
       <SettingRow title="Opening page" description="Where you land after signing in.">
         <select className="select" aria-label="Opening page" value={d.default_view}
           onChange={(e) => update({ display: { default_view: e.target.value } })}>
@@ -21,11 +21,11 @@ export default function DisplaySection() {
           {DAYS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
         </select>
       </SettingRow>
-      <SettingRow title="Density" description="Compact tightens tables and cards to fit more on screen.">
-        <select className="select" aria-label="Density" value={d.density}
-          onChange={(e) => update({ display: { density: e.target.value } })}>
-          <option value="comfortable">Comfortable</option>
-          <option value="compact">Compact</option>
+      <SettingRow title="Theme" description="Light or dark colours. Applied straight away.">
+        <select className="select" aria-label="Theme" value={d.theme}
+          onChange={(e) => update({ display: { theme: e.target.value } })}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
         </select>
       </SettingRow>
     </SettingGroup>

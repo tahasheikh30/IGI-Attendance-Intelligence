@@ -109,6 +109,6 @@ export const axiosError = (status, detail) => Object.assign(new Error(`Request f
 // The defaults a new account gets (what GET /api/me/preferences returns before anything is saved).
 export const preferences = (over = {}) => ({
   notifications: { enabled: true, popups: true, categories: { data: true, access: true, uploads: true, users: true } },
-  display: { default_view: "overview", default_days: 30, density: "comfortable" },
+  display: { default_view: "overview", default_days: 30, theme: "light" },
   ...over,
 });

@@ -1,5 +1,5 @@
 function heatColor(pct, scheduled) {
-  if (!scheduled) return "#EEF1F5";
+  if (!scheduled) return "var(--surface-muted)";
   // 0% late -> soft blue, 100% late -> red, interpolated
   const t = Math.min(1, pct / 100);
   const from = [196, 224, 245]; // light blue
