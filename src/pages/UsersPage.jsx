@@ -4,7 +4,6 @@ import {
 } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toaster";
-import LoadingDots from "../components/LoadingDots";
 
 const emptyForm = { username: "", name: "", password: "", role: "manager", departments: [], companies: [] };
 const ROLE_LABEL = { admin: "HR admin", hod: "HOD", manager: "Manager" };
@@ -256,7 +255,7 @@ export default function UsersPage() {
     }
   };
 
-  if (!users) return <LoadingDots page />;
+  if (!users) return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
 
   const editingUser = users.find(u => u.id === editingId);
 

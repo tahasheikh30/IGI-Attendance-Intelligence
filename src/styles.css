@@ -1297,7 +1297,6 @@ h1 {
   display: inline-flex; flex-direction: column; align-items: center; gap: 14px;
   color: var(--text-secondary);
 }
-.loading-dots-inline { --dot: 6px; --gap: 12px; --hop: 9px; flex-direction: row; gap: 10px; }
 .loading-dots-track {
   position: relative; display: block;
   width: calc(var(--gap) * 2 + var(--dot)); height: calc(var(--hop) + var(--dot) + 2px);
@@ -1305,13 +1304,27 @@ h1 {
 .loading-dots-track i {
   position: absolute; left: 0; bottom: 0;
   width: var(--dot); height: var(--dot); border-radius: 50%;
-  background: var(--accent);
 }
-.loading-dots-track .dot-a { animation: dots-a 2.4s ease-in-out infinite; }
-.loading-dots-track .dot-b { animation: dots-b 2.4s ease-in-out infinite; opacity: 0.8; }
-.loading-dots-track .dot-c { animation: dots-c 2.4s ease-in-out infinite; opacity: 0.6; }
+.loading-dots-track .dot-a { background: var(--accent); animation: dots-a 2.4s ease-in-out infinite; }
+.loading-dots-track .dot-b { background: #E0457B; animation: dots-b 2.4s ease-in-out infinite; }
+.loading-dots-track .dot-c { background: #F2A93B; animation: dots-c 2.4s ease-in-out infinite; }
 .loading-dots-label { font-size: 13.5px; }
-.loading-dots-page { position: fixed; inset: 0; z-index: 5; display: flex; justify-content: center; pointer-events: none; }
+/* The global loader hovers over the whole page, above the settings window too, and never takes a click. */
+.gl { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.gl-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; overflow: hidden; background: rgba(28, 116, 184, 0.18); }
+.gl-bar::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, var(--accent), #E0457B, #F2A93B);
+  animation: gl-slide 1.2s ease-in-out infinite;
+}
+@keyframes gl-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.gl-card {
+  padding: 18px 28px 18px 24px;
+  background: var(--surface); color: var(--text); font-weight: 600;
+  border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+.gl-card .loading-dots { flex-direction: row; gap: 16px; color: inherit; }
 /* Each swap is two neighbours trading places: the one moving right hops over, the one moving left slips under. */
 @keyframes dots-a {
   0%, 100% { transform: translate(0, 0); }
@@ -1345,6 +1358,7 @@ h1 {
   91.667% { transform: translate(calc(var(--gap) * 1.5), calc(var(--hop) * -1)); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .gl-bar::after { animation: none; width: 100%; opacity: 0.6; }
   .loading-dots-track .dot-a, .loading-dots-track .dot-b, .loading-dots-track .dot-c { animation: none; }
   .loading-dots-track .dot-b { transform: translateX(var(--gap)); }
   .loading-dots-track .dot-c { transform: translateX(calc(var(--gap) * 2)); }

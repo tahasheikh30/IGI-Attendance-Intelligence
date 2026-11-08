@@ -25,22 +25,17 @@ describe("LoadingDots", () => {
     expect(container.querySelector("[style]")).toBeNull();
   });
 
-  it("has a page variant that sits in the middle of the screen", () => {
-    const { container } = render(<LoadingDots page />);
-    expect(container.querySelector(".loading-dots-page")).not.toBeNull();
+  it("gives each dot its own colour", () => {
     const css = fs.readFileSync(path.resolve(__dirname, "../styles.css"), "utf8");
-    expect(css).toMatch(/\.loading-dots-page \{[^}]*position: fixed;[^}]*justify-content: center;[^}]*pointer-events: none;/);
-  });
-
-  it("has an inline variant", () => {
-    const { container } = render(<LoadingDots inline />);
-    expect(container.querySelector(".loading-dots-inline")).not.toBeNull();
+    const colours = ["dot-a", "dot-b", "dot-c"].map(d => css.match(new RegExp(`\\.${d} \\{ background: ([^;]+);`))[1]);
+    expect(new Set(colours).size).toBe(3);
   });
 
   it("turns the movement off for people who ask for reduced motion", () => {
     const css = fs.readFileSync(path.resolve(__dirname, "../styles.css"), "utf8");
-    const block = css.slice(css.indexOf("prefers-reduced-motion: reduce) {\n  .loading-dots-track"));
+    const block = css.slice(css.indexOf("prefers-reduced-motion: reduce) {\n  .gl-bar::after"));
     for (const dot of ["dot-a", "dot-b", "dot-c"]) expect(block).toContain(`.loading-dots-track .${dot}`);
+    expect(block).toMatch(/\.gl-bar::after \{ animation: none;/);
     expect(block).toMatch(/animation: none/);
   });
 });

@@ -5,7 +5,6 @@ import { useRange } from "../context/RangeContext";
 import { useAuth } from "../context/AuthContext";
 import ProfileMenu from "./ProfileMenu";
 import { useNotifications } from "./Toaster";
-import LoadingDots from "./LoadingDots";
 
 const ROLE_LABEL = { admin: "HR admin", hod: "Head of Department", manager: "Manager" };
 
@@ -253,7 +252,7 @@ function PeriodPicker({ period, onSelect }) {
 
       {open && (
         <div className="company-dropdown-menu" role="listbox" aria-label="Pay periods">
-          {periodsList === null && <div className="employee-search-status"><LoadingDots inline /></div>}
+          {periodsList === null && <div className="employee-search-status"><span className="sr-only">Loading…</span></div>}
           {periodsList?.length === 0 && <div className="employee-search-status">No periods available</div>}
           {periodsList?.map(p => (
             <button

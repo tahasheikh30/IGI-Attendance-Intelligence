@@ -8,7 +8,6 @@ import { getAnalytics } from "../api";
 import DailyHeatmap from "../components/DailyHeatmap";
 import { useRange } from "../context/RangeContext";
 import { useAuth } from "../context/AuthContext";
-import LoadingDots from "../components/LoadingDots";
 
 const METRIC_COLORS = { "Late %": "#D85A30", "Early leave %": "#D4537E", "Late hours %": "#1C74B8", "Anomaly %": "#A5680B" };
 
@@ -47,7 +46,7 @@ export default function AnalyticsPage() {
     }
   };
 
-  if (!data) return <LoadingDots page />;
+  if (!data) return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
 
   const { weeklyTrend, dayOfWeek, lateDistribution, dailyHeatmap, deptComparison } = data;
   const maxDowScheduled = Math.max(...dayOfWeek.map(d => d.scheduled), 1);

@@ -4,7 +4,6 @@ import { getDepartment, downloadDepartmentReport } from "../api";
 import StatCard from "../components/StatCard";
 import EmployeeDrawer from "../components/EmployeeDrawer";
 import { useRange } from "../context/RangeContext";
-import LoadingDots from "../components/LoadingDots";
 
 export default function DepartmentPage() {
   const { dept } = useParams();
@@ -86,7 +85,7 @@ export default function DepartmentPage() {
       </div>
     );
   }
-  if (!data) return <LoadingDots page />;
+  if (!data) return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
 
   const { kpis } = data;
 

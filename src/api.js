@@ -1,4 +1,5 @@
 import axios from "axios";
+import { beginActivity } from "./lib/activity";
 
 // In local dev, VITE_API_URL is unset and requests go to the relative
 // "/api" path, which vite.config.js proxies to localhost:8000. In
@@ -20,15 +21,22 @@ export const clearStoredToken = () => sessionStorage.removeItem(TOKEN_KEY);
 
 const api = axios.create({ baseURL: API_BASE });
 
+// Requests the person waits for are counted, so the global loader (components/GlobalLoader.jsx) can show.
+// Background requests pass { silent: true } and are not counted: the new-data poll and the search as you type.
 api.interceptors.request.use((config) => {
   const token = getStoredToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (!config.silent) config.endActivity = beginActivity();
   return config;
 });
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    res.config?.endActivity?.();
+    return res;
+  },
   (err) => {
+    err?.config?.endActivity?.();
     if (err?.response?.status === 401) {
       clearStoredToken();
       // AuthContext listens for this to flip back to the login screen
@@ -50,7 +58,7 @@ export const savePreferences = (prefs) => api.put("/me/preferences", prefs).then
 // Changes the signed in person's own password. The answer carries a fresh token, because the old one stops working.
 export const changePassword = (current_password, new_password) =>
   api.post("/me/password", { current_password, new_password }).then(r => r.data);
-export const getDataStatus = () => api.get("/data-status").then(r => r.data);
+export const getDataStatus = () => api.get("/data-status", { silent: true }).then(r => r.data);
 
 // Every window-scoped endpoint below takes EITHER `days` (a rolling
 // day-count) OR `period` (a 'YYYY-MM' company pay period, the 19th of
@@ -87,7 +95,7 @@ export const getEmployee = (empNo, days = 365, period = null) =>
 // Cross-department employee lookup by name or ID, for the navbar search --
 // scoped server-side to whatever the logged-in user is allowed to see.
 export const searchEmployees = (q) =>
-  api.get(`/employees/search?q=${encodeURIComponent(q)}`).then(r => r.data);
+  api.get(`/employees/search?q=${encodeURIComponent(q)}`, { silent: true }).then(r => r.data);
 export const getAnalytics = (days = 90, company = null, period = null) =>
   api.get(`/analytics${buildWindowQuery(days, period, { company })}`).then(r => r.data);
 export const getUploads = () => api.get("/uploads").then(r => r.data);
