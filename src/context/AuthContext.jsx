@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { login as apiLogin, getMe, getStoredToken, setStoredToken, clearStoredToken } from "../api";
+import { login as apiLogin, changePassword as apiChangePassword, getMe, getStoredToken, setStoredToken, clearStoredToken } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -42,6 +42,13 @@ export function AuthProvider({ children }) {
     setToken(data.access_token);
   }, []);
 
+  // The server signs this person out everywhere else and hands back a token for this session.
+  const changePassword = useCallback(async (current, next) => {
+    const data = await apiChangePassword(current, next);
+    setStoredToken(data.access_token);
+    setToken(data.access_token);
+  }, []);
+
   const logout = useCallback(() => {
     clearStoredToken();
     setToken(null);
@@ -50,7 +57,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      token, login, logout,
+      token, login, logout, changePassword,
       // re-reads /api/me: the app calls it on a timer to notice that an admin changed this person's role or access
       refreshMe: loadMe,
       isAuthenticated: !!token,

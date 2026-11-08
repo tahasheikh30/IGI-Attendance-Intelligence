@@ -139,6 +139,54 @@ describe("SettingsModal", () => {
   });
 });
 
+describe("Change password", () => {
+  const form = async (props = {}) => {
+    auth.value = authValue(users.manager, { changePassword: vi.fn().mockResolvedValue(undefined) });
+    await openModal(props);
+    fireEvent.click(screen.getByRole("button", { name: "Change password" }));
+  };
+  const fill = (cur, nw, again) => {
+    fireEvent.change(screen.getByLabelText("Current password"), { target: { value: cur } });
+    fireEvent.change(screen.getByLabelText("New password"), { target: { value: nw } });
+    fireEvent.change(screen.getByLabelText("Repeat new password"), { target: { value: again } });
+  };
+  it("is offered to every role, not only administrators", async () => {
+    await form();
+    expect(screen.getByRole("form", { name: "Change password" })).toBeInTheDocument();
+  });
+  it("sends the current and new password, then closes", async () => {
+    await form();
+    fill("old-password", "new-password-1", "new-password-1");
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    await waitFor(() => expect(auth.value.changePassword).toHaveBeenCalledWith("old-password", "new-password-1"));
+    await waitFor(() => expect(screen.queryByRole("form", { name: "Change password" })).toBeNull());
+  });
+  it.each([
+    ["short", "short", /at least 8/],
+    ["longenough1", "different-1", /do not match/],
+  ])("checks the new password before sending (%s)", async (nw, again, message) => {
+    await form();
+    fill("old-password", nw, again);
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(auth.value.changePassword).not.toHaveBeenCalled();
+  });
+  it("refuses a new password equal to the current one", async () => {
+    await form();
+    fill("same-password-1", "same-password-1", "same-password-1");
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    expect(await screen.findByText(/different from your current/)).toBeInTheDocument();
+  });
+  it("shows the server's reason, such as a wrong current password, and stays open", async () => {
+    await form();
+    auth.value.changePassword.mockRejectedValue(axiosError(400, "Your current password is not correct."));
+    fill("wrong-password", "new-password-1", "new-password-1");
+    fireEvent.click(screen.getByRole("button", { name: "Save password" }));
+    expect(await screen.findByText("Your current password is not correct.")).toBeInTheDocument();
+    expect(screen.getByRole("form", { name: "Change password" })).toBeInTheDocument();
+  });
+});
+
 describe("Administrators section", () => {
   const open = async () => {
     await openModal({ initial: "administrators" });
