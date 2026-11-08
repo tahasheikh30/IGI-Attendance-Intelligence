@@ -94,7 +94,7 @@ export default function AdministratorsSection() {
 
   return (
     <>
-      <SettingGroup title="Administrators" hint="Administrators have full access. Keep this list short.">
+      <SettingGroup title="Current administrators" hint="Administrators have full access. Keep this list short.">
         <ul className="admin-list" aria-label="Administrators">
           {admins.map((u) => {
             const isSelf = u.id === me?.id;

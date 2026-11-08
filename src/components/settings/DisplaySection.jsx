@@ -7,7 +7,7 @@ export default function DisplaySection() {
   const { prefs, update } = usePreferences();
   const d = prefs.display;
   return (
-    <SettingGroup title="Display" hint="The opening page and window apply each time you sign in. Changing the window in the top bar still works for the session.">
+    <SettingGroup title="Appearance and defaults" hint="The opening page and window apply each time you sign in. Changing the window in the top bar still works for the session.">
       <SettingRow title="Opening page" description="Where you land after signing in.">
         <select className="select" aria-label="Opening page" value={d.default_view}
           onChange={(e) => update({ display: { default_view: e.target.value } })}>
