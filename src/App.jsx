@@ -145,7 +145,7 @@ function Gate() {
     // Briefly loading role/department info right after a token is found
     // (fresh login or page refresh) -- avoids flashing admin-only nav
     // items before we actually know the role.
-    return <div className="empty-state"><LoadingDots /></div>;
+    return <LoadingDots page />;
   }
   if (!isAuthenticated) return <LoginPage />;
   // The toast list and the settings belong to the signed in person: they are created after sign in and gone after

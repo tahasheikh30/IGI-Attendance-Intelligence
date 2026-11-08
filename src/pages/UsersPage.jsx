@@ -256,7 +256,7 @@ export default function UsersPage() {
     }
   };
 
-  if (!users) return <div className="empty-state"><LoadingDots /></div>;
+  if (!users) return <LoadingDots page />;
 
   const editingUser = users.find(u => u.id === editingId);
 

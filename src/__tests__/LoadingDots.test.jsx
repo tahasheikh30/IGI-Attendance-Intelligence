@@ -25,6 +25,13 @@ describe("LoadingDots", () => {
     expect(container.querySelector("[style]")).toBeNull();
   });
 
+  it("has a page variant that sits in the middle of the screen", () => {
+    const { container } = render(<LoadingDots page />);
+    expect(container.querySelector(".loading-dots-page")).not.toBeNull();
+    const css = fs.readFileSync(path.resolve(__dirname, "../styles.css"), "utf8");
+    expect(css).toMatch(/\.loading-dots-page \{[^}]*position: fixed;[^}]*justify-content: center;[^}]*pointer-events: none;/);
+  });
+
   it("has an inline variant", () => {
     const { container } = render(<LoadingDots inline />);
     expect(container.querySelector(".loading-dots-inline")).not.toBeNull();

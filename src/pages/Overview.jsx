@@ -45,7 +45,7 @@ export default function Overview() {
   }, [data, search]);
 
   if (loading) {
-    return <div className="empty-state"><LoadingDots /></div>;
+    return <LoadingDots page />;
   }
 
   if (failed && !data) {

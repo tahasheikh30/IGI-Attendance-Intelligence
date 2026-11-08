@@ -1311,6 +1311,7 @@ h1 {
 .loading-dots-track .dot-b { animation: dots-b 2.4s ease-in-out infinite; opacity: 0.8; }
 .loading-dots-track .dot-c { animation: dots-c 2.4s ease-in-out infinite; opacity: 0.6; }
 .loading-dots-label { font-size: 13.5px; }
+.loading-dots-page { position: fixed; inset: 0; z-index: 5; display: flex; justify-content: center; pointer-events: none; }
 /* Each swap is two neighbours trading places: the one moving right hops over, the one moving left slips under. */
 @keyframes dots-a {
   0%, 100% { transform: translate(0, 0); }

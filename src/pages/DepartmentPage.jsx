@@ -86,7 +86,7 @@ export default function DepartmentPage() {
       </div>
     );
   }
-  if (!data) return <div className="empty-state"><LoadingDots /></div>;
+  if (!data) return <LoadingDots page />;
 
   const { kpis } = data;
 

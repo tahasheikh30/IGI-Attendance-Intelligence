@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
     }
   };
 
-  if (!data) return <div className="empty-state"><LoadingDots /></div>;
+  if (!data) return <LoadingDots page />;
 
   const { weeklyTrend, dayOfWeek, lateDistribution, dailyHeatmap, deptComparison } = data;
   const maxDowScheduled = Math.max(...dayOfWeek.map(d => d.scheduled), 1);
