@@ -255,7 +255,7 @@ export default function UsersPage() {
     }
   };
 
-  if (!users) return <div className="empty-state">Loading…</div>;
+  if (!users) return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
 
   const editingUser = users.find(u => u.id === editingId);
 

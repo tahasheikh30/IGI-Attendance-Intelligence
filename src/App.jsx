@@ -19,6 +19,7 @@ import { RangeProvider } from "./context/RangeContext";
 import { PreferencesProvider, usePreferences } from "./context/PreferencesContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { getDataStatus } from "./api";
+import GlobalLoader from "./components/GlobalLoader";
 
 const POLL_MS = 60_000;
 
@@ -144,7 +145,7 @@ function Gate() {
     // Briefly loading role/department info right after a token is found
     // (fresh login or page refresh) -- avoids flashing admin-only nav
     // items before we actually know the role.
-    return <div className="empty-state">Loading…</div>;
+    return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
   }
   if (!isAuthenticated) return <LoginPage />;
   // The toast list and the settings belong to the signed in person: they are created after sign in and gone after
@@ -163,6 +164,7 @@ function Gate() {
 export default function App() {
   return (
     <AuthProvider>
+      <GlobalLoader />
       <Gate />
     </AuthProvider>
   );

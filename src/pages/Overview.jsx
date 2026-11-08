@@ -44,7 +44,7 @@ export default function Overview() {
   }, [data, search]);
 
   if (loading) {
-    return <div className="empty-state">Loading…</div>;
+    return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
   }
 
   if (failed && !data) {

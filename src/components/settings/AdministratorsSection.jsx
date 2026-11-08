@@ -90,7 +90,7 @@ export default function AdministratorsSection() {
   if (error) {
     return <p className="notice notice-warn" role="alert">{error} <button type="button" className="link-btn" onClick={load}>Try again</button></p>;
   }
-  if (!users) return <p className="setting-hint">Loading accounts…</p>;
+  if (!users) return <p className="sr-only">Loading accounts…</p>;
 
   return (
     <>

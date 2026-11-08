@@ -85,7 +85,7 @@ export default function DepartmentPage() {
       </div>
     );
   }
-  if (!data) return <div className="empty-state">Loading…</div>;
+  if (!data) return <div className="empty-state"><span className="sr-only">Loading…</span></div>;
 
   const { kpis } = data;
 

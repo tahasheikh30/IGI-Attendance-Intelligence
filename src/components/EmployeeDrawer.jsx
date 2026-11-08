@@ -71,7 +71,7 @@ export default function EmployeeDrawer({ empNo, onClose }) {
   return (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer" onClick={e => e.stopPropagation()}>
-        {loading && <div className="drawer-loading">Loading…</div>}
+        {loading && <div className="drawer-loading"><span className="sr-only">Loading…</span></div>}
         {data && (
           <>
             <div className="drawer-header">
@@ -107,7 +107,7 @@ export default function EmployeeDrawer({ empNo, onClose }) {
                   </button>
                   {periodMenuOpen && (
                     <div className="company-dropdown-menu" role="listbox">
-                      {periodsList === null && <div className="employee-search-status">Loading…</div>}
+                      {periodsList === null && <div className="employee-search-status"><span className="sr-only">Loading…</span></div>}
                       {periodsList?.map(p => (
                         <button
                           key={p.key}
