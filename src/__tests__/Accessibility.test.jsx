@@ -1,7 +1,7 @@
 // Runs axe-core over every screen in its main states. jsdom has no layout or stylesheet, so the rules that need
 // them (colour contrast, region landmarks) are switched off; everything structural is checked.
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import axe from "axe-core";
 import { users } from "../test/data";
@@ -53,6 +53,22 @@ describe("accessibility (axe)", () => {
     app("/");
     await screen.findByText("Employees needing attention (2)");
     expect(await violations()).toEqual([]);
+  });
+  it("notifications page", async () => {
+    app("/notifications");
+    await screen.findByText(/nothing yet/i);
+    expect(await violations()).toEqual([]);
+  });
+  it("settings modal, every section", async () => {
+    app("/");
+    await screen.findByText("Employees needing attention (2)");
+    fireEvent.click(screen.getByRole("button", { name: /account menu/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    for (const name of ["Account", "Notifications", "Display", "Administrators"]) {
+      fireEvent.click(within(screen.getByRole("navigation", { name: "Settings sections" })).getByRole("button", { name }));
+      if (name === "Administrators") await screen.findByLabelText("Make Hamid Life an administrator");
+      expect(await violations(screen.getByRole("dialog"))).toEqual([]);
+    }
   });
   it("analytics", async () => {
     app("/analytics");

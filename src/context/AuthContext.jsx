@@ -51,6 +51,8 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       token, login, logout,
+      // re-reads /api/me: the app calls it on a timer to notice that an admin changed this person's role or access
+      refreshMe: loadMe,
       isAuthenticated: !!token,
       // isAuthenticated flips true as soon as a token exists, but `me`
       // (role, departments) loads a moment later -- meLoading lets

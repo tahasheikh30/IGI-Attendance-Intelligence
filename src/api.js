@@ -44,6 +44,11 @@ export const login = (username, password) =>
 
 export const getMe = () => api.get("/me").then(r => r.data);
 
+// Per-user settings (notifications and display) and the cheap poll the app uses to notice new data.
+export const getPreferences = () => api.get("/me/preferences").then(r => r.data.preferences);
+export const savePreferences = (prefs) => api.put("/me/preferences", prefs).then(r => r.data.preferences);
+export const getDataStatus = () => api.get("/data-status").then(r => r.data);
+
 // Every window-scoped endpoint below takes EITHER `days` (a rolling
 // day-count) OR `period` (a 'YYYY-MM' company pay period, the 19th of
 // that month through the 18th of the next) -- never both. `period`, when

@@ -1,8 +1,10 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { getCompanies, getPeriods, searchEmployees } from "../api";
 import { useRange } from "../context/RangeContext";
 import { useAuth } from "../context/AuthContext";
+import ProfileMenu from "./ProfileMenu";
+import { useNotifications } from "./Toaster";
 
 const ROLE_LABEL = { admin: "HR admin", hod: "Head of Department", manager: "Manager" };
 
@@ -10,14 +12,6 @@ const ROLE_LABEL = { admin: "HR admin", hod: "Head of Department", manager: "Man
 // (brand, profile, sign out) still renders everywhere -- it's the app's
 // top bar now, not something scoped to a subset of pages.
 const HIDDEN_ON = ["/upload", "/about", "/users"];
-
-function initialsFor(name) {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] || "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
-}
 
 // Cross-department employee lookup by name or ID -- deliberately separate
 // from the company dropdown/period chips above, since it isn't scoped to
@@ -283,8 +277,10 @@ function PeriodPicker({ period, onSelect }) {
   );
 }
 
-export default function Navbar({ onSelectEmployee }) {
+export default function Navbar({ onSelectEmployee, onOpenSettings = () => {} }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { unread } = useNotifications();
   const { days, setDays, company, setCompany, period, setPeriod } = useRange();
   const { isAdmin, isHod, me, logout } = useAuth();
   const [companies, setCompanies] = useState([]);
@@ -347,21 +343,19 @@ export default function Navbar({ onSelectEmployee }) {
 
         <div className="navbar-profile">
           {me && (
-            <>
-              <div className="navbar-avatar">{initialsFor(me.name)}</div>
-              <div className="navbar-profile-info">
-                <div className="navbar-profile-name">{me.name}</div>
-                <div className="navbar-profile-role">{ROLE_LABEL[me.role] || me.role}</div>
-              </div>
-            </>
+            <div className="navbar-profile-info">
+              <div className="navbar-profile-name">{me.name}</div>
+              <div className="navbar-profile-role">{ROLE_LABEL[me.role] || me.role}</div>
+            </div>
           )}
-          <button className="navbar-signout" onClick={logout}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 14H3.5A1.5 1.5 0 0 1 2 12.5v-9A1.5 1.5 0 0 1 3.5 2H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M10.5 11.5 14 8l-3.5-3.5M14 8H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="signout-label">Sign out</span>
-          </button>
+          <ProfileMenu
+            name={me?.name}
+            username={me?.username}
+            unread={unread}
+            onSettings={onOpenSettings}
+            onNotifications={() => navigate("/notifications")}
+            onSignOut={logout}
+          />
         </div>
       </div>
     </div>

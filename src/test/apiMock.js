@@ -13,6 +13,9 @@ export function createApiMock() {
     clearStoredToken: () => sessionStorage.removeItem(TOKEN_KEY),
     login: vi.fn(),
     getMe: vi.fn(),
+    getPreferences: vi.fn(),
+    savePreferences: vi.fn(),
+    getDataStatus: vi.fn(),
     getPeriods: vi.fn(),
     getOverview: vi.fn(),
     getCompanies: vi.fn(),
@@ -41,6 +44,9 @@ export function resetApiMock(api, me = data.users.admin) {
   for (const [k, v] of Object.entries(api)) if (v?.mockReset) v.mockReset();
   api.login.mockResolvedValue({ access_token: "tok-123", token_type: "bearer" });
   api.getMe.mockResolvedValue(me);
+  api.getPreferences.mockResolvedValue(data.preferences());
+  api.savePreferences.mockImplementation(async (p) => p);
+  api.getDataStatus.mockResolvedValue({ version: "1.1", latestDate: "2026-10-18" });
   api.getPeriods.mockResolvedValue(data.periods());
   api.getOverview.mockResolvedValue(data.overview());
   api.getCompanies.mockResolvedValue(data.companies());
