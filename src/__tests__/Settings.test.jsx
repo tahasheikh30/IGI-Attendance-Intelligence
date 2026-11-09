@@ -243,7 +243,7 @@ describe("Administrators section", () => {
     api.current.getUsers.mockResolvedValue([...userRows(), { ...userRows()[0], id: 9, username: "a2", name: "Second Admin" }]);
     await openModal({ initial: "administrators" });
     fireEvent.click(await screen.findByLabelText("Remove Second Admin as administrator"));
-    choose(screen.getByLabelText("Their new role"), /^HOD/);
+    choose(screen.getByLabelText("Their new role"), /^Executive/);
     fireEvent.click(screen.getByRole("button", { name: "Remove administrator" }));
     await waitFor(() => expect(api.current.updateUser).toHaveBeenCalledWith(9, { role: "hod" }));
   });
