@@ -98,4 +98,45 @@ describe("request counting", () => {
     expect(seen).toEqual([false, false]);
     expect(isBusy()).toBe(false);
   });
+
+  it("while signing in only the top bar shows, not the loader card", () => {
+    vi.useFakeTimers();
+    const { container } = render(<GlobalLoader />);
+    let end;
+    act(() => { end = beginActivity({ quiet: true }); });
+    act(() => vi.advanceTimersByTime(400));
+    expect(container.querySelector(".gl-bar")).not.toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+    act(() => end());
+    act(() => vi.advanceTimersByTime(1000));
+    expect(container.querySelector(".gl")).toBeNull();
+    vi.useRealTimers();
+  });
+  it("a quiet wait does not hide the card of an ordinary request running at the same time", () => {
+    vi.useFakeTimers();
+    render(<GlobalLoader />);
+    let q, n;
+    act(() => { q = beginActivity({ quiet: true }); n = beginActivity(); });
+    act(() => vi.advanceTimersByTime(400));
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    act(() => { q(); n(); });
+    vi.useRealTimers();
+  });
+  it("the signing in request is the quiet one", async () => {
+    const api = (await import("../api")).default;
+    const seen = [];
+    const orig = api.defaults.adapter;
+    api.defaults.adapter = (config) => { seen.push(config.quiet); return Promise.resolve({ data: {}, status: 200, statusText: "OK", headers: {}, config }); };
+    const { login } = await import("../api");
+    await login("u", "p");
+    api.defaults.adapter = orig;
+    expect(seen).toEqual([true]);
+  });
+  it("the dots sit on the same centre line as the words, and the card is centred", () => {
+    const track = css.match(/\.loading-dots-track \{[^}]*\}/)[0];
+    expect(track).toMatch(/height:\s*var\(--dot\)/);
+    expect(css.match(/\.gl-card \.loading-dots \{[^}]*\}/)[0]).toMatch(/align-items:\s*center/);
+    expect(css.match(/\.loading-dots-label \{[^}]*\}/)[0]).toMatch(/line-height:\s*1;/);
+    expect(css.match(/\.gl \{[^}]*\}/)[0]).toMatch(/align-items:\s*center/);
+  });
 });

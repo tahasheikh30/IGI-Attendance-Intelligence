@@ -1,3 +1,4 @@
+import { choose, optionTexts } from "./selectHelper";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { authValue, renderWithProviders } from "../test/render";
@@ -90,7 +91,7 @@ describe("creating a user", () => {
   it("opens a form that defaults to a manager and hides the New user button", async () => {
     await open();
     expect(screen.getByText("New user")).toBeInTheDocument();
-    expect(field("Role")).toHaveValue("manager");
+    expect(field("Role")).toHaveTextContent(/^Manager/);
     expect(screen.queryByRole("button", { name: "+ New user" })).toBeNull();
   });
   it("requires username, name and a password of at least 8 characters", async () => {
@@ -104,7 +105,7 @@ describe("creating a user", () => {
   });
   it("offers three roles", async () => {
     await open();
-    expect([...field("Role").querySelectorAll("option")].map((o) => o.value)).toEqual(["manager", "hod", "admin"]);
+    expect(optionTexts(field("Role")).map((t) => t.split(" ")[0])).toEqual(["Manager", "HOD", "Admin"]);
   });
   it("creating a manager sends the ticked departments, grouped by company in the picker", async () => {
     await open();
@@ -140,7 +141,7 @@ describe("creating a user", () => {
   });
   it("switching to HOD shows the company picker instead, and sends only companies", async () => {
     await open();
-    fireEvent.change(field("Role"), { target: { value: "hod" } });
+    choose(field("Role"), /^HOD/);
     expect(screen.queryByText("Departments this manager can view")).toBeNull();
     expect(screen.getByText(/Companies this HOD can view/)).toBeInTheDocument();
     fillBasics();
@@ -151,7 +152,7 @@ describe("creating a user", () => {
   });
   it("an HOD's company can be unticked", async () => {
     await open();
-    fireEvent.change(field("Role"), { target: { value: "hod" } });
+    choose(field("Role"), /^HOD/);
     fillBasics();
     const box = screen.getByLabelText(/IGI Life/);
     fireEvent.click(box); fireEvent.click(box);
@@ -161,7 +162,7 @@ describe("creating a user", () => {
   it("an admin gets no pickers and sends no grants even if some were ticked before switching", async () => {
     await open();
     fireEvent.click(screen.getByLabelText(/Finance \(2\)/));
-    fireEvent.change(field("Role"), { target: { value: "admin" } });
+    choose(field("Role"), /^Admin/);
     expect(document.querySelector(".dept-picker")).toBeNull();
     fillBasics();
     fireEvent.click(screen.getByRole("button", { name: "Create user" }));
@@ -212,7 +213,7 @@ describe("creating a user", () => {
     api.current.getCompanies.mockResolvedValue([]);
     await open();
     expect(screen.getByText("No department data yet - upload an export first.")).toBeInTheDocument();
-    fireEvent.change(field("Role"), { target: { value: "hod" } });
+    choose(field("Role"), /^HOD/);
     expect(screen.getByText("No company data yet - upload an export first.")).toBeInTheDocument();
   });
   it("failed picker data loads leave empty pickers instead of crashing", async () => {
@@ -231,7 +232,7 @@ describe("editing a user", () => {
     expect(screen.getByText("Edit mgr-fin")).toBeInTheDocument();
     expect(within(form()).queryByLabelText("Username")).toBeNull();
     expect(field("Display name")).toHaveValue("Mina Finance");
-    expect(field("Role")).toHaveValue("manager");
+    expect(field("Role")).toHaveTextContent(/^Manager/);
     expect(field("Reset password")).toHaveValue("");
     expect(field("Reset password")).not.toBeRequired();
     expect(screen.queryByRole("button", { name: "+ New user" })).toBeNull();
@@ -265,7 +266,7 @@ describe("editing a user", () => {
   });
   it("changing a manager to an HOD sends no departments and the chosen companies", async () => {
     await open();
-    fireEvent.change(field("Role"), { target: { value: "hod" } });
+    choose(field("Role"), /^HOD/);
     fireEvent.click(screen.getByLabelText(/IGI General/));
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(api.current.updateUser).toHaveBeenCalledWith(4, { name: "Mina Finance", role: "hod", departments: [], companies: ["IGI General"] }));
@@ -278,7 +279,7 @@ describe("editing a user", () => {
   it("a refusal (for instance demoting yourself) is shown and the form stays", async () => {
     api.current.updateUser.mockRejectedValue(axiosError(400, "You can't demote your own account -- have another admin do it"));
     await open("hr-admin");
-    fireEvent.change(field("Role"), { target: { value: "manager" } });
+    choose(field("Role"), /^Manager/);
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     expect(await screen.findByText(/You can't demote your own account/)).toBeInTheDocument();
     expect(form()).not.toBeNull();

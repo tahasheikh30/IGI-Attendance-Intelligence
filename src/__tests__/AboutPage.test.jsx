@@ -58,10 +58,19 @@ describe("AboutPage content", () => {
     expect(screen.getByText(/raise the everyday quality of life/)).toBeInTheDocument();
     expect(screen.getByText("Our Core Values")).toBeInTheDocument();
   });
-  it("each core value carries its own colour on the left edge", () => {
+  it("each core value is a bar filled with its own colour", () => {
     show();
-    const colours = [...document.querySelectorAll(".value-row")].map((r) => r.style.borderLeftColor);
+    const colours = [...document.querySelectorAll(".value-row")].map((r) => r.style.getPropertyValue("--value-color"));
+    expect(colours.every(Boolean)).toBe(true);
     expect(new Set(colours).size).toBe(5);
+  });
+  it("the bars are filled with that colour and the words on them are white", async () => {
+    const css = (await import("node:fs")).readFileSync((await import("node:path")).resolve(__dirname, "../styles.css"), "utf8");
+    const row = css.match(/\.value-row \{[^}]*\}/)[0];
+    expect(row).toMatch(/background:\s*var\(--value-color/);
+    expect(row).toMatch(/color:\s*#fff/);
+    expect(css.match(/\.value-row-name \{[^}]*\}/)[0]).toMatch(/color:\s*#fff/);
+    expect(css.match(/\.value-row-blurb \{[^}]*\}/)[0]).toMatch(/color:\s*#fff/);
   });
 });
 

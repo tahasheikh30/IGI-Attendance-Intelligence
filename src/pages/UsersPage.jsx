@@ -1,3 +1,4 @@
+import SelectMenu from "../components/SelectMenu";
 import { useEffect, useMemo, useState } from "react";
 import {
   getUsers, createUser, updateUser, resetUserPassword, deleteUser, getAllDepartments, getCompanies,
@@ -139,15 +140,16 @@ function UserForm({ initial, allDepts, allCompanies, onCancel, onSubmit, submitL
 
       <label className="login-label" style={{ maxWidth: 320 }}>
         Role
-        <select
-          className="select"
+        <SelectMenu
+          ariaLabel="Role"
           value={form.role}
-          onChange={e => setForm({ ...form, role: e.target.value })}
-        >
-          <option value="manager">Manager - view only, specific departments</option>
-          <option value="hod">HOD - view only, every department in a company</option>
-          <option value="admin">Admin - full HR access</option>
-        </select>
+          options={[
+            { value: "manager", label: "Manager - view only, specific departments" },
+            { value: "hod", label: "HOD - view only, every department in a company" },
+            { value: "admin", label: "Admin - full HR access" },
+          ]}
+          onChange={v => setForm({ ...form, role: v })}
+        />
       </label>
 
       {form.role === "manager" && (

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useIsBusy } from "../lib/activity";
+import { useIsBusy, useIsCardBusy } from "../lib/activity";
 import LoadingDots from "./LoadingDots";
 
 // Quick requests finish before anyone could read a loader, and a flash of one feels worse than none.
@@ -29,17 +29,21 @@ function useDelayedVisibility(active) {
 /**
  * One loader for the whole app, hovering over the page and not part of it: a thin coloured bar across
  * the top and a small card in the middle of the screen with the jumping dots. It shows whenever a
- * request is running, never blocks clicks, and is only in the page while something is loading.
+ * request is running, never blocks clicks, and is only in the page while something is loading. While signing in
+ * only the bar shows: the sign in button says \"Signing in, please wait\" instead.
  */
 export default function GlobalLoader() {
-  const visible = useDelayedVisibility(useIsBusy());
-  if (!visible) return null;
+  const barVisible = useDelayedVisibility(useIsBusy());
+  const cardVisible = useDelayedVisibility(useIsCardBusy());
+  if (!barVisible && !cardVisible) return null;
   return (
     <div className="gl" aria-busy="true">
-      <div className="gl-bar" aria-hidden="true" />
-      <div className="gl-card">
-        <LoadingDots />
-      </div>
+      {barVisible && <div className="gl-bar" aria-hidden="true" />}
+      {cardVisible && (
+        <div className="gl-card">
+          <LoadingDots />
+        </div>
+      )}
     </div>
   );
 }

@@ -177,11 +177,12 @@ const GROUP_COMPANIES = [
 ];
 
 // The group's five core values, as published in its Code of Conduct. Colors
-// match the segments of the values ribbon graphic (/assets/core-values.png).
+// follow the segments of the values ribbon graphic (/assets/core-values.png), with the two lightest segments
+// (Care, Honesty) a little deeper so the white text on their bars stays readable.
 const CORE_VALUES = [
   {
     name: "Care",
-    color: "#C3D62E",
+    color: "#9DB21A",
     blurb: "Fairness and consideration run through everything the group does.",
   },
   {
@@ -196,7 +197,7 @@ const CORE_VALUES = [
   },
   {
     name: "Honesty",
-    color: "#F5A93F",
+    color: "#E58F1F",
     blurb: "Truthfulness, integrity and trust underpin every activity.",
   },
   {
@@ -305,7 +306,7 @@ function GroupCompanyCard({ name, sector, color, blurb }) {
 
 function ValueRow({ name, color, blurb }) {
   return (
-    <div className="value-row" style={{ borderLeftColor: color }}>
+    <div className="value-row" style={{ "--value-color": color }}>
       <div className="value-row-name">{name}</div>
       <p className="value-row-blurb">{blurb}</p>
     </div>
