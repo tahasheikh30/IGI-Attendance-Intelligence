@@ -49,7 +49,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
     fill("u", "p");
     submit();
-    const btn = await screen.findByRole("button", { name: "Signing in…" });
+    const btn = await screen.findByRole("button", { name: "Signing in, please wait…" });
     expect(btn).toBeDisabled();
     resolve();
     await waitFor(() => expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled());
@@ -92,5 +92,12 @@ describe("LoginPage", () => {
   it("shows no error to begin with", () => {
     const { container } = render(<LoginPage />);
     expect(container.querySelector(".login-error")).toBeNull();
+  });
+
+  it("the sign in page restates the light colours, so the dark theme cannot reach it", async () => {
+    const css = (await import("node:fs")).readFileSync((await import("node:path")).resolve(__dirname, "../styles.css"), "utf8");
+    const block = css.match(/\.login-screen \{[^}]*\}/)[0];
+    expect(block).toMatch(/color-scheme:\s*light/);
+    for (const v of ["--surface: #ffffff", "--text: #1E2530", "--border: #DCE3EC", "--accent: #1C74B8"]) expect(block).toContain(v);
   });
 });

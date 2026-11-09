@@ -1,10 +1,11 @@
+import SelectMenu from "../SelectMenu";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getUsers, updateUser } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../Toaster";
 import { SettingGroup } from "./controls";
 
-const ROLE_LABEL = { admin: "HR admin", hod: "HOD", manager: "Manager" };
+const ROLE_LABEL = { admin: "HR admin", hod: "Executive", manager: "Manager" };
 
 /**
  * Who can administer the app. An administrator can promote any active account here, and remove another
@@ -71,10 +72,9 @@ export default function AdministratorsSection() {
         {!promote && (
           <label className="admin-confirm-role">
             Their new role
-            <select className="select" value={pending.role} onChange={(e) => setPending({ ...pending, role: e.target.value })}>
-              <option value="manager">Manager (no access until departments are granted)</option>
-              <option value="hod">HOD (no access until companies are granted)</option>
-            </select>
+            <SelectMenu ariaLabel="Their new role" value={pending.role}
+              options={[{ value: "manager", label: "Manager (no access until departments are granted)" }, { value: "hod", label: "Executive (no access until companies are granted)" }]}
+              onChange={(v) => setPending({ ...pending, role: v })} />
           </label>
         )}
         <div className="admin-confirm-actions">

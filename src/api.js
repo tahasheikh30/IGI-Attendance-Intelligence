@@ -22,11 +22,12 @@ export const clearStoredToken = () => sessionStorage.removeItem(TOKEN_KEY);
 const api = axios.create({ baseURL: API_BASE });
 
 // Requests the person waits for are counted, so the global loader (components/GlobalLoader.jsx) can show.
+// Signing in passes { quiet: true }: the top bar runs but the sign in button says what is happening instead of the card.
 // Background requests pass { silent: true } and are not counted: the new-data poll and the search as you type.
 api.interceptors.request.use((config) => {
   const token = getStoredToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  if (!config.silent) config.endActivity = beginActivity();
+  if (!config.silent) config.endActivity = beginActivity({ quiet: !!config.quiet });
   return config;
 });
 
@@ -48,7 +49,7 @@ api.interceptors.response.use(
 );
 
 export const login = (username, password) =>
-  api.post("/auth/login", { username, password }).then(r => r.data);
+  api.post("/auth/login", { username, password }, { quiet: true }).then(r => r.data);
 
 export const getMe = () => api.get("/me").then(r => r.data);
 

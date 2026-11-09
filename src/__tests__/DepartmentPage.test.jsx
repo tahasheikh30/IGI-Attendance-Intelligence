@@ -1,3 +1,5 @@
+import { choose, optionTexts } from "./selectHelper";
+const SORT_LABELS = { anomalyScore: "Sort: anomaly score", latePct: "Sort: late %", otHours: "Sort: late hours", missing: "Sort: missing punches" };
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../test/render";
@@ -163,13 +165,13 @@ describe("employee table", () => {
     show();
     await screen.findByRole("heading", { name: "Finance" });
     expect(names()[0]).toBe("Sara Ahmed");              // anomaly score puts her first
-    fireEvent.change(document.querySelector("select"), { target: { value: key } });
+    choose(screen.getByLabelText("Sort employees by"), SORT_LABELS[key]);
     expect(names()).toEqual(expected);
   });
   it("offers the four sort options", async () => {
     show();
     await screen.findByRole("heading", { name: "Finance" });
-    expect([...document.querySelectorAll("option")].map((o) => o.textContent)).toEqual([
+    expect(optionTexts(screen.getByLabelText("Sort employees by"))).toEqual([
       "Sort: anomaly score", "Sort: late %", "Sort: late hours", "Sort: missing punches"]);
   });
   it("search by name, case insensitive", async () => {
@@ -188,8 +190,8 @@ describe("employee table", () => {
   it("does not mutate the order the server sent", async () => {
     show();
     await screen.findByRole("heading", { name: "Finance" });
-    fireEvent.change(document.querySelector("select"), { target: { value: "missing" } });
-    fireEvent.change(document.querySelector("select"), { target: { value: "anomalyScore" } });
+    choose(screen.getByLabelText("Sort employees by"), "Sort: missing punches");
+    choose(screen.getByLabelText("Sort employees by"), "Sort: anomaly score");
     expect(names()).toEqual(["Ali Khan", "Sara Ahmed"]);
   });
   it("clicking a row opens the drawer for that person", async () => {

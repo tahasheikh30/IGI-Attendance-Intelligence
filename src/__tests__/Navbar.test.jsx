@@ -31,7 +31,7 @@ describe("Navbar brand and profile", () => {
   });
   it.each([
     ["admin", "Hira Admin", "HA", "HR admin"],
-    ["hod", "Hamid Life", "HL", "Head of Department"],
+    ["hod", "Hamid Life", "HL", "Executive"],
     ["manager", "Mina Finance", "MF", "Manager"],
   ])("a %s sees their name, initials and role", (role, name, initials, label) => {
     auth.value = authValue(users[role]);
