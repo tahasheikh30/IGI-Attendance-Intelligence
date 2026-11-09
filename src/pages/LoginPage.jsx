@@ -59,7 +59,7 @@ export default function LoginPage() {
         {error && <div className="login-error">{error}</div>}
 
         <button type="submit" className="btn-primary login-submit" disabled={loading}>
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? "Signing in, please wait…" : "Sign in"}
         </button>
       </form>
     </div>

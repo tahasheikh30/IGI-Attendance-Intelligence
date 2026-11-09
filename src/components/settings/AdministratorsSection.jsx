@@ -1,3 +1,4 @@
+import SelectMenu from "../SelectMenu";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getUsers, updateUser } from "../../api";
 import { useAuth } from "../../context/AuthContext";
@@ -71,10 +72,9 @@ export default function AdministratorsSection() {
         {!promote && (
           <label className="admin-confirm-role">
             Their new role
-            <select className="select" value={pending.role} onChange={(e) => setPending({ ...pending, role: e.target.value })}>
-              <option value="manager">Manager (no access until departments are granted)</option>
-              <option value="hod">HOD (no access until companies are granted)</option>
-            </select>
+            <SelectMenu ariaLabel="Their new role" value={pending.role}
+              options={[{ value: "manager", label: "Manager (no access until departments are granted)" }, { value: "hod", label: "HOD (no access until companies are granted)" }]}
+              onChange={(v) => setPending({ ...pending, role: v })} />
           </label>
         )}
         <div className="admin-confirm-actions">

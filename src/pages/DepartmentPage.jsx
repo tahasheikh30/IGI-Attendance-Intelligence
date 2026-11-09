@@ -1,3 +1,4 @@
+import SelectMenu from "../components/SelectMenu";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { getDepartment, downloadDepartmentReport } from "../api";
@@ -123,12 +124,13 @@ export default function DepartmentPage() {
               onChange={e => setSearch(e.target.value)}
               className="input"
             />
-            <select value={sortKey} onChange={e => setSortKey(e.target.value)} className="select" aria-label="Sort employees by">
-              <option value="anomalyScore">Sort: anomaly score</option>
-              <option value="latePct">Sort: late %</option>
-              <option value="otHours">Sort: late hours</option>
-              <option value="missing">Sort: missing punches</option>
-            </select>
+            <SelectMenu ariaLabel="Sort employees by" value={sortKey} onChange={setSortKey}
+              options={[
+                { value: "anomalyScore", label: "Sort: anomaly score" },
+                { value: "latePct", label: "Sort: late %" },
+                { value: "otHours", label: "Sort: late hours" },
+                { value: "missing", label: "Sort: missing punches" },
+              ]} />
           </div>
         </div>
 

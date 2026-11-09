@@ -1,3 +1,4 @@
+import { choose } from "./selectHelper";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { screen, fireEvent, waitFor, act, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -110,16 +111,16 @@ describe("SettingsModal", () => {
     function Probe() { const { unread } = useNotifications(); return <span data-testid="unread">{unread}</span>; }
     render(<Harness><SettingsModal initial="display" onClose={() => {}} onSignOut={() => {}} /><Probe /></Harness>);
     await waitFor(() => expect(api.current.getPreferences).toHaveBeenCalled());
-    fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "dark" } });
+    choose(screen.getByLabelText("Theme"), "Dark");
     await act(async () => { vi.advanceTimersByTime(700); });
-    await waitFor(() => expect(screen.getByLabelText("Theme")).toHaveValue("light"));
+    await waitFor(() => expect(screen.getByLabelText("Theme")).toHaveTextContent("Light"));
     expect(screen.getByTestId("unread")).toHaveTextContent("1");
   });
   it("when settings cannot be loaded it says so and does not try to save", async () => {
     api.current.getPreferences.mockRejectedValue(axiosError(500));
     await openModal({ initial: "display" });
     expect(await screen.findByText(/could not be loaded/i)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "dark" } });
+    choose(screen.getByLabelText("Theme"), "Dark");
     await new Promise((r) => setTimeout(r, 700));
     expect(api.current.savePreferences).not.toHaveBeenCalled();
   });
@@ -127,7 +128,7 @@ describe("SettingsModal", () => {
     api.current.getPreferences.mockResolvedValue(preferences({ display: { default_view: "overview", default_days: 30, theme: "dark" } }));
     await openModal({ initial: "display" });
     await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
-    fireEvent.change(screen.getByLabelText("Theme"), { target: { value: "light" } });
+    choose(screen.getByLabelText("Theme"), "Light");
     expect(document.documentElement.dataset.theme).toBe("light");
   });
   it("the theme stays on the page after signing out, and is remembered for the next visit", async () => {
@@ -242,7 +243,7 @@ describe("Administrators section", () => {
     api.current.getUsers.mockResolvedValue([...userRows(), { ...userRows()[0], id: 9, username: "a2", name: "Second Admin" }]);
     await openModal({ initial: "administrators" });
     fireEvent.click(await screen.findByLabelText("Remove Second Admin as administrator"));
-    fireEvent.change(screen.getByLabelText("Their new role"), { target: { value: "hod" } });
+    choose(screen.getByLabelText("Their new role"), /^HOD/);
     fireEvent.click(screen.getByRole("button", { name: "Remove administrator" }));
     await waitFor(() => expect(api.current.updateUser).toHaveBeenCalledWith(9, { role: "hod" }));
   });
