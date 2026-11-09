@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import ProfileMenu from "./ProfileMenu";
 import { useNotifications } from "./Toaster";
 
-const ROLE_LABEL = { admin: "HR admin", hod: "Head of Department", manager: "Manager" };
+const ROLE_LABEL = { admin: "HR admin", hod: "Executive", manager: "Manager" };
 
 // Pages that don't need the company/period controls. The navbar itself
 // (brand, profile, sign out) still renders everywhere -- it's the app's

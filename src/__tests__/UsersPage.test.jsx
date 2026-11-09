@@ -37,7 +37,7 @@ describe("list", () => {
     const rows = [...document.querySelectorAll("tbody tr")].map((r) => [...r.children].slice(0, 5).map((c) => c.textContent));
     expect(rows).toEqual([
       ["Hira Admin (you)", "hr-admin", "HR admin", "All departments", "Active"],
-      ["Hamid Life", "hod-life", "HOD", "Every dept in: IGI Life", "Active"],
+      ["Hamid Life", "hod-life", "Executive", "Every dept in: IGI Life", "Active"],
       ["Mina Finance", "mgr-fin", "Manager", "Finance, HR", "Active"],
       ["Gone Person", "gone", "Manager", "None assigned", "Inactive"],
     ]);
@@ -105,7 +105,7 @@ describe("creating a user", () => {
   });
   it("offers three roles", async () => {
     await open();
-    expect(optionTexts(field("Role")).map((t) => t.split(" ")[0])).toEqual(["Manager", "HOD", "Admin"]);
+    expect(optionTexts(field("Role")).map((t) => t.split(" ")[0])).toEqual(["Manager", "Executive", "Admin"]);
   });
   it("creating a manager sends the ticked departments, grouped by company in the picker", async () => {
     await open();
@@ -141,9 +141,9 @@ describe("creating a user", () => {
   });
   it("switching to HOD shows the company picker instead, and sends only companies", async () => {
     await open();
-    choose(field("Role"), /^HOD/);
+    choose(field("Role"), /^Executive/);
     expect(screen.queryByText("Departments this manager can view")).toBeNull();
-    expect(screen.getByText(/Companies this HOD can view/)).toBeInTheDocument();
+    expect(screen.getByText(/Companies this executive can view/)).toBeInTheDocument();
     fillBasics();
     fireEvent.click(screen.getByLabelText(/IGI Life/));
     fireEvent.click(screen.getByRole("button", { name: "Create user" }));
@@ -152,7 +152,7 @@ describe("creating a user", () => {
   });
   it("an HOD's company can be unticked", async () => {
     await open();
-    choose(field("Role"), /^HOD/);
+    choose(field("Role"), /^Executive/);
     fillBasics();
     const box = screen.getByLabelText(/IGI Life/);
     fireEvent.click(box); fireEvent.click(box);
@@ -213,7 +213,7 @@ describe("creating a user", () => {
     api.current.getCompanies.mockResolvedValue([]);
     await open();
     expect(screen.getByText("No department data yet - upload an export first.")).toBeInTheDocument();
-    choose(field("Role"), /^HOD/);
+    choose(field("Role"), /^Executive/);
     expect(screen.getByText("No company data yet - upload an export first.")).toBeInTheDocument();
   });
   it("failed picker data loads leave empty pickers instead of crashing", async () => {
@@ -266,7 +266,7 @@ describe("editing a user", () => {
   });
   it("changing a manager to an HOD sends no departments and the chosen companies", async () => {
     await open();
-    choose(field("Role"), /^HOD/);
+    choose(field("Role"), /^Executive/);
     fireEvent.click(screen.getByLabelText(/IGI General/));
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(api.current.updateUser).toHaveBeenCalledWith(4, { name: "Mina Finance", role: "hod", departments: [], companies: ["IGI General"] }));

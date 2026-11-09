@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../Toaster";
 import { SettingGroup } from "./controls";
 
-const ROLE_LABEL = { admin: "HR admin", hod: "HOD", manager: "Manager" };
+const ROLE_LABEL = { admin: "HR admin", hod: "Executive", manager: "Manager" };
 
 /**
  * Who can administer the app. An administrator can promote any active account here, and remove another
@@ -73,7 +73,7 @@ export default function AdministratorsSection() {
           <label className="admin-confirm-role">
             Their new role
             <SelectMenu ariaLabel="Their new role" value={pending.role}
-              options={[{ value: "manager", label: "Manager (no access until departments are granted)" }, { value: "hod", label: "HOD (no access until companies are granted)" }]}
+              options={[{ value: "manager", label: "Manager (no access until departments are granted)" }, { value: "hod", label: "Executive (no access until companies are granted)" }]}
               onChange={(v) => setPending({ ...pending, role: v })} />
           </label>
         )}

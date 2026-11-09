@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toaster";
 
 const emptyForm = { username: "", name: "", password: "", role: "manager", departments: [], companies: [] };
-const ROLE_LABEL = { admin: "HR admin", hod: "HOD", manager: "Manager" };
+const ROLE_LABEL = { admin: "HR admin", hod: "Executive", manager: "Manager" };
 
 function DepartmentPicker({ allDepts, selected, onChange }) {
   // Grouped by company so a manager who oversees departments across two
@@ -145,7 +145,7 @@ function UserForm({ initial, allDepts, allCompanies, onCancel, onSubmit, submitL
           value={form.role}
           options={[
             { value: "manager", label: "Manager - view only, specific departments" },
-            { value: "hod", label: "HOD - view only, every department in a company" },
+            { value: "hod", label: "Executive - view only, every department in a company" },
             { value: "admin", label: "Admin - full HR access" },
           ]}
           onChange={v => setForm({ ...form, role: v })}
@@ -166,7 +166,7 @@ function UserForm({ initial, allDepts, allCompanies, onCancel, onSubmit, submitL
       {form.role === "hod" && (
         <>
           <div className="hint" style={{ marginTop: 8 }}>
-            Companies this HOD can view - every current and future department within them
+            Companies this executive can view - every current and future department within them
           </div>
           <CompanyPicker
             allCompanies={allCompanies}
@@ -272,7 +272,7 @@ export default function UsersPage() {
       <div className="page-header">
         <div>
           <h1>Manage users</h1>
-          <p className="page-sub">HR admins see everything. HODs see every department in the companies you grant. Managers see only the specific departments you grant.</p>
+          <p className="page-sub">HR admins see everything. Executives (CEO, COO and similar) see every department in the companies you grant. Managers see only the specific departments you grant.</p>
         </div>
         {!creating && !editingId && (
           <button className="btn-primary" onClick={() => setCreating(true)}>+ New user</button>

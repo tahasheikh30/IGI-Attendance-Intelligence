@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../Toaster";
 import { SettingGroup, SettingRow } from "./controls";
 
-export const ROLE_LABEL = { admin: "HR admin", hod: "Head of Department", manager: "Manager" };
+export const ROLE_LABEL = { admin: "HR admin", hod: "Executive", manager: "Manager" };
 
 function accessSummary(me) {
   if (me.role === "admin") return "Every company and department";
